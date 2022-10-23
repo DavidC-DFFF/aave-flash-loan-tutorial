@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {FlashLoanSimpleReceiverBase} from "@aave/core-v3/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol";
 import {IPoolAddressesProvider} from "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
 import {IERC20} from "@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol";
+//import {ERC20} from "@aave/core-v3/contracts/dependencies/openzeppelin/contracts/ERC20.sol";
 
 contract FlashLoan is FlashLoanSimpleReceiverBase {
     address payable owner;
 
     constructor(address _addressProvider)
+        // Constructor deploy : 0xc4dCB5126a3AfEd129BC3668Ea19285A9f56D15D
         FlashLoanSimpleReceiverBase(IPoolAddressesProvider(_addressProvider))
     {
         owner = payable(msg.sender);
@@ -61,9 +63,15 @@ contract FlashLoan is FlashLoanSimpleReceiverBase {
         return IERC20(_tokenAddress).balanceOf(address(this));
     }
 
-    function withdraw(address _tokenAddress) external onlyOwner {
+    function withdraw(address _tokenAddress) external {
         IERC20 token = IERC20(_tokenAddress);
         token.transfer(msg.sender, token.balanceOf(address(this)));
+    }
+
+    function deposit(address _tokenAddress, uint _amount) external {
+        //IERC20 token = IERC20(_tokenAddress);
+        //IERC20(_tokenAddress).approve(address(this), _amount);
+        IERC20(_tokenAddress).transferFrom(msg.sender, address(this), _amount);
     }
 
     modifier onlyOwner() {
